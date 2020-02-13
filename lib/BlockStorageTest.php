@@ -297,7 +297,8 @@ abstract class BlockStorageTest {
             if ($size === NULL || $free < $size) $size = $free;
           }
           // reduce size according to active range (if < 100%) or free space buffer
-          if ($this->options['active_range'] < 100) $size *= ($this->options['active_range'] * 0.01);
+          if ($this->options['active_size'] > 0) $size = size_from_string($this->options['active_size']);
+          else if ($this->options['active_range'] < 100) $size *= ($this->options['active_range'] * 0.01);
           else if (!$this->deviceTargets) $size -= self::BLOCK_STORAGE_TEST_FREE_SPACE_BUFFER;
           $size = round($size);
           // not enough free space to continue
@@ -893,8 +894,8 @@ abstract class BlockStorageTest {
             $params = array(
               'platform' => $controllers[$n]->getPlatformParameters(),
               'device' => $controllers[$n]->getDeviceParameters(),
-              'setup' => array_merge(array('Data Pattern' => isset($options['norandom']) && $options['norandom'] ? 'PLAIN' : 'RND', 'AR' => $options['active_range'] . '%'), $controllers[$n]->getSetupParameters()),
-              'test' => array_merge(array('Data Pattern' => isset($options['norandom']) && $options['norandom'] ? 'PLAIN' : 'RND', 'AR &amp; Amount' => $options['active_range'] . '%'), $controllers[$n]->getTestParameters())
+              'setup' => array_merge(array('Data Pattern' => isset($options['norandom']) && $options['norandom'] ? 'PLAIN' : 'RND', 'AR' => $options['active_range'] . '%', 'AS' => $options['active_size']), $controllers[$n]->getSetupParameters()),
+              'test' => array_merge(array('Data Pattern' => isset($options['norandom']) && $options['norandom'] ? 'PLAIN' : 'RND', 'AR &amp; Amount' => $options['active_range'] . '%', 'AS' => $options['active_size']), $controllers[$n]->getTestParameters())
             );
             $headers = array();
             for ($i=0; $i<100; $i++) {
@@ -1255,6 +1256,7 @@ abstract class BlockStorageTest {
     $ini = get_benchmark_ini();
     $defaults = array(
       'active_range' => 100,
+      'active_size' => 0,
       'collectd_rrd_dir' => '/var/lib/collectd/rrd',
       'fio' => 'fio',
       'fio_options' => array(
@@ -1289,6 +1291,7 @@ abstract class BlockStorageTest {
     );
     $opts = array(
       'active_range:',
+      'active_size:',
       'collectd_rrd',
       'collectd_rrd_dir:',
       'fio:',
@@ -1760,7 +1763,8 @@ abstract class BlockStorageTest {
           $size = self::getFreeSpace($target,$bytes=TRUE);
           
           // adjust for active range and volume target free space buffer
-          if ($this->options['active_range'] < 100) $size *= ($this->options['active_range'] * 0.01);
+          if ($this->options['active_size'] > 0) $size = size_from_string($this->options['active_size']);
+          else if ($this->options['active_range'] < 100) $size *= ($this->options['active_range'] * 0.01);
           else if ($this->volumeTargets) $size -= self::BLOCK_STORAGE_TEST_FREE_SPACE_BUFFER;
           $size = round($size);
           

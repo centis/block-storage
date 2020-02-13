@@ -56,6 +56,14 @@ variables (e.g. `export bm_param_test=iops`)
                             type targets are specified, active range will be 
                             limited to the least amount of free space on all 
                             targets
+
+* active_size               Specifies the target size for very large targets.
+                            For exmaple, the size of an AWS EFS FileSystem
+                            is about 8191 PiB so even if --active_range 1
+                            is specified the target size is will still be
+                            9 PiB.  Valid suffixes are TB, GB, MB, KB or
+                            none.  For example: 1TB, 128GB, 1024MB,
+                            512KB or 1048576.
                             
 * collectd_rrd              If set, collectd rrd stats will be captured from 
                             --collectd_rrd_dir. To do so, when testing starts,
